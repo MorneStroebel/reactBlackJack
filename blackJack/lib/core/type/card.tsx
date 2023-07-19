@@ -1,19 +1,11 @@
-export type Card = {
-    success:   boolean;
-    deck_id:   string;
-    cards:     CardElement[];
-    remaining: number;
+export enum Suits {
+    Clubs = 'Clubs',
+    Diamonds = 'Diamonds',
+    Clover = 'Clover',
+    Hearts = 'Hearts'
 }
 
-export type CardElement = {
-    code:   string;
-    image:  string;
-    images: Images;
-    value:  string;
-    suit:   string;
-}
-
-export type Images = {
-    svg: string;
-    png: string;
+export type Card ={
+    numericValue: number,
+    suitValue: Suits,
 }

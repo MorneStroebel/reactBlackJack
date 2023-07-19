@@ -20,7 +20,7 @@ export class Deck {
                 }
             }
         }
-       return deck
+       return deck.sort(()=> Math.random() - 0.5)
     }
 
     getTopCard = (deck: Card[]): [Card , Card[]] => {

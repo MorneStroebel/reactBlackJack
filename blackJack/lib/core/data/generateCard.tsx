@@ -2,28 +2,19 @@ import {Card} from "../type/card";
 import {ColorValue, StyleSheet, Text, View} from "react-native";
 import React from "react";
 import {GestureResponderEvent} from "react-native/Libraries/Types/CoreEventTypes";
+import {styles} from "../../src/screens/playScreen/playScreen";
 
 type Props = {
     card: Card,
-    height: number,
-    width: number
+    index: number
 };
-export const GenerateCard: React.FC<Props> = ({card, height, width}) => {
+export const GenerateCard: React.FC<Props> = ({card, index}) => {
     return (
-        <View style={CardStyles(height, width).cardStyle}>
+        <View style={styles(index).imageStack}>
             <Text>{card.numericValue}</Text>
             <Text>{card.suitValue}</Text>
         </View>
     );
 }
 
-export const CardStyles = (height: number, width: number) => StyleSheet.create({
-    cardStyle: {
-        height: height,
-        width: width,
-        backgroundColor: 'red',
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center'
-    }
-})
+

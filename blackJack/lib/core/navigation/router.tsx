@@ -19,11 +19,14 @@ export function Router() {
                 <Stack.Navigator
                     screenOptions={routerOptions}
                     initialRouteName={Routes.Home}>
-                    <Stack.Screen name={Routes.Home} component={Home}/>
+                    <Stack.Screen
+                        name={Routes.Home}
+                        component={Home}
+                    />
                     <Stack.Screen
                         name={Routes.PlayScreen}
                         component={PlayScreen}
-                        initialParams={{cardDeck: {} as CardDeck}}/>
+                    />
                 </Stack.Navigator>
             </NavigationContainer>
         </SafeAreaProvider>

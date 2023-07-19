@@ -47,7 +47,12 @@ export const PlayScreen = ({navigation}) => {
             myCards.push(drawnCard)
             setMyCards(myCards)
             setMyTotal(myTotal + drawnCard.numericValue)
+            if (myTotal + drawnCard.numericValue > 21){
+                setGameStatus('You busted')
+                setPlayerStay(true)
+            }
         }
+
     }
     const checkStatus = (TotalOfDealer: number, TotalOfPlayer: number) => {
         setPlayerStay(true)

@@ -7,7 +7,7 @@ import {
     useWindowDimensions,
     View
 } from "react-native";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Card} from "../../../core/type/card";
 import {Routes} from "../../../core/navigation/routes";
 import {EdgeInsets, useSafeAreaInsets} from "react-native-safe-area-context";
@@ -21,7 +21,7 @@ export const PlayScreen = ({navigation}) => {
     const insets: EdgeInsets = useSafeAreaInsets();
     const scaledSize: ScaledSize = useWindowDimensions();
 
-    const [playDeck, setPlayDeck] = useState<Card[]>(new Deck().newDeck(6))
+    const playDeck = useRef<Card[]>(new Deck().newDeck(1));
     const [dealerCards, setDealerCards] = useState<Card[]>([]);
     const [dealerTotal, setDealerTotal] = useState<number>(0);
     const [myCards, setMyCards] = useState<Card[]>([]);
@@ -29,49 +29,39 @@ export const PlayScreen = ({navigation}) => {
     const [playerStay, setPlayerStay] = useState<boolean>(false);
     const [gameStatus, setGameStatus] = useState<string>('');
     const [showAll, setShowAll] = useState<boolean>(true);
-    const DealerDrawCard = () => {
-        if (playDeck.length > 0) {
-            let drawnCard: Card = playDeck[0];
-            let newDeck: Card[] = playDeck.slice(1, playDeck.length)
-            setPlayDeck(newDeck)
-            dealerCards.push(drawnCard)
-            setDealerCards(dealerCards)
-            setDealerTotal(dealerTotal + drawnCard.numericValue)
+    const dealerDrawCard = () => {
+        if (playDeck.current.length > 0) {
+            let drawnCard: Card = playDeck.current[0];
+            playDeck.current = playDeck.current.slice(1, playDeck.current.length);
+            dealerCards.push(drawnCard);
+            setDealerCards(dealerCards);
+            setDealerTotal(dealerTotal + drawnCard.numericValue);
         }
     }
-    const PlayerDrawCard = () => {
-        if (playDeck.length > 0) {
-            let drawnCard: Card = playDeck[0];
-            let newDeck: Card[] = playDeck.slice(1, playDeck.length)
-            setPlayDeck(newDeck)
-            myCards.push(drawnCard)
-            setMyCards(myCards)
-            setMyTotal(myTotal + drawnCard.numericValue)
-            if (myTotal + drawnCard.numericValue > 21){
-                setGameStatus('You busted')
-                setPlayerStay(true)
+    const playerDrawCard = () => {
+        if (playDeck.current.length > 0) {
+            let drawnCard: Card = playDeck.current[0];
+            playDeck.current = playDeck.current.slice(1, playDeck.current.length);
+            myCards.push(drawnCard);
+            setMyCards(myCards);
+            setMyTotal(myTotal + drawnCard.numericValue);
+            if (myTotal + drawnCard.numericValue > 21) {
+                setGameStatus('You busted');
+                setPlayerStay(true);
             }
         }
-
     }
     const checkStatus = (TotalOfDealer: number, TotalOfPlayer: number) => {
-        setPlayerStay(true)
-        if (TotalOfDealer == TotalOfPlayer) {
-            setGameStatus('draw')
-        }
-        if (TotalOfDealer > 21 && TotalOfPlayer <= 21) {
-            setGameStatus('you win')
-        }
-        if (TotalOfPlayer <= 21 && TotalOfDealer <= 21 && TotalOfPlayer > TotalOfDealer) {
-            setGameStatus('you win')
-        }
-        if (TotalOfPlayer <= 21 && TotalOfDealer <= 21 && TotalOfPlayer < TotalOfDealer) {
-            setGameStatus('dealer win')
+        setPlayerStay(true);
+        setShowAll(false)
+        if (TotalOfDealer < 17) {
+            dealerDrawCard();
+            console.log(dealerCards);
         }
     }
 
     useEffect(() => {
-        DealerDrawCard()
+        dealerDrawCard();
     }, [])
     return (
         <View style={{flex: 1}}>
@@ -147,7 +137,7 @@ export const PlayScreen = ({navigation}) => {
                     }}>
                         <AppPrimaryButton
                             text={'Hit'}
-                            onPress={() => PlayerDrawCard()}
+                            onPress={() => playerDrawCard()}
                             backgroundColor={playerStay ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
                             isDisabled={playerStay}
@@ -155,13 +145,8 @@ export const PlayScreen = ({navigation}) => {
                         />
                         <AppPrimaryButton
                             text={'stay'}
-                            onPress={(): void => {
-                                setPlayerStay(true);
-                                setShowAll(false)
-                                if (dealerTotal < 17) {
-                                    DealerDrawCard()
-                                }
-                                checkStatus(dealerTotal, myTotal)
+                            onPress={async () => {
+                                checkStatus(dealerTotal, myTotal);
                             }}
                             backgroundColor={playerStay ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
@@ -171,7 +156,7 @@ export const PlayScreen = ({navigation}) => {
                         <AppPrimaryButton
                             text={'Play again'}
                             onPress={(): void => {
-                                navigation.push(Routes.PlayScreen)
+                                navigation.push(Routes.PlayScreen);
                             }}
                             backgroundColor={!playerStay ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
@@ -188,22 +173,24 @@ export const PlayScreen = ({navigation}) => {
 const buttonActiveBackgroundColor: ColorValue = '#e1a0b5'
 const buttonDisabledBackgroundColor: ColorValue = '#959ba6'
 const buttonTextColor: ColorValue = '#181f12'
-export const styles = (index?: number) => StyleSheet.create({
-    textStyles: {
-        color: '#f7ecdc',
-        fontSize: 18
-    },
-    imageStack: {
-        height: 150,
-        width: 80,
-        position: 'absolute',
-        right: -index * 20,
-        backgroundColor: 'white',
-        borderRadius: 10,
-        borderWidth: 0.5,
-        borderColor: 'black',
-        padding: 16
-    },
-})
+export const styles = (index?: number) => {
+    return StyleSheet.create({
+        textStyles: {
+            color: '#f7ecdc',
+            fontSize: 18
+        },
+        imageStack: {
+            height: 150,
+            width: 80,
+            position: 'absolute',
+            right: -index * 20,
+            backgroundColor: 'white',
+            borderRadius: 10,
+            borderWidth: 0.5,
+            borderColor: 'black',
+            padding: 16
+        },
+    });
+};
 
 

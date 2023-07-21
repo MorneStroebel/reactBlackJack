@@ -18,11 +18,7 @@ export function Router() {
             <NavigationContainer>
                 <Stack.Navigator
                     screenOptions={routerOptions}
-                    initialRouteName={Routes.Home}>
-                    <Stack.Screen
-                        name={Routes.Home}
-                        component={Home}
-                    />
+                    initialRouteName={Routes.PlayScreen}>
                     <Stack.Screen
                         name={Routes.PlayScreen}
                         component={PlayScreen}

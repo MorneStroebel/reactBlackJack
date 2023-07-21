@@ -38,7 +38,7 @@ export class Deck {
 
     getNumberSuits = (cardNumber: number): Card[] => {
         let suitList: Card[] = [];
-        for (let k = 0; k < 4; k++) {
+        for (let k: number = 0; k < 4; k++) {
             switch (k) {
                 case 0:
                     suitList.push({
@@ -75,8 +75,8 @@ export class Deck {
 
     newDeck = (numberOfDecks: number): Card[] => {
         let deck: Card[] = [];
-        for (let i = 1; i < 14; i++) {
-            for (let j = 0; j < numberOfDecks; j++) {
+        for (let i: number = 1; i < 14; i++) {
+            for (let j: number = 0; j < numberOfDecks; j++) {
                 deck = [...deck, ...this.getNumberSuits(i)]
             }
         }

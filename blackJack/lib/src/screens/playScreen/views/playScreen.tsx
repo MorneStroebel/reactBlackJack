@@ -108,7 +108,7 @@ export const PlayScreen = ({navigation}) => {
     }
 
     useEffect(() => {
-        const newGameDeck: Card[] = new Deck().newDeck(6)
+        const newGameDeck: Card[] = new Deck().newDeck(1)
         updateGameState(
             newGameDeck.slice(3, newGameDeck.length),
             [newGameDeck[0]],

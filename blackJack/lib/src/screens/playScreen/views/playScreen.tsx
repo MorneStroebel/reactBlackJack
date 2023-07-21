@@ -8,12 +8,13 @@ import {
     View
 } from "react-native";
 import React, {useEffect, useRef, useState} from "react";
-import {Card} from "../../../core/type/card";
-import {Routes} from "../../../core/navigation/routes";
+import {Card} from "../../../../core/type/card";
+import {Routes} from "../../../../core/navigation/routes";
 import {EdgeInsets, useSafeAreaInsets} from "react-native-safe-area-context";
-import AppPrimaryButton from "../../../core/shared components/AppButton";
-import {Deck} from "../../../core/data/Deck";
-import {GenerateCard} from "../../../core/data/generateCard";
+import AppPrimaryButton from "../../../../core/shared components/AppButton";
+import {Deck} from "../../../../core/data/Deck";
+import {GenerateCard} from "../../../../core/data/generateCard";
+import {GameType} from "../../../../core/type/game-type";
 
 
 export const PlayScreen = ({navigation}) => {
@@ -21,48 +22,105 @@ export const PlayScreen = ({navigation}) => {
     const insets: EdgeInsets = useSafeAreaInsets();
     const scaledSize: ScaledSize = useWindowDimensions();
 
-    const playDeck = useRef<Card[]>(new Deck().newDeck(1));
-    const [dealerCards, setDealerCards] = useState<Card[]>([]);
-    const [dealerTotal, setDealerTotal] = useState<number>(0);
-    const [myCards, setMyCards] = useState<Card[]>([]);
-    const [myTotal, setMyTotal] = useState<number>(0);
-    const [playerStay, setPlayerStay] = useState<boolean>(false);
-    const [gameStatus, setGameStatus] = useState<string>('');
-    const [showAll, setShowAll] = useState<boolean>(true);
-    const dealerDrawCard = () => {
-        if (playDeck.current.length > 0) {
-            let drawnCard: Card = playDeck.current[0];
-            playDeck.current = playDeck.current.slice(1, playDeck.current.length);
-            dealerCards.push(drawnCard);
-            setDealerCards(dealerCards);
-            setDealerTotal(dealerTotal + drawnCard.numericValue);
-        }
+    const [gameState, setGameState] = useState<GameType>({
+        gameDeck: [],
+        dealerCards: [],
+        playerCards: [],
+        playerScore: 0,
+        dealerScore: 0,
+        gameOutcome: '',
+        isPlayerStaying: false,
+        showAll: true,
+    });
+
+    const updateGameState = (
+        gameDeck: Card[],
+        dealerCards: Card[],
+        playerCards: Card[],
+        dealerScore: number,
+        playerScore: number,
+        gameOutcome: string,
+        isStaying: boolean,
+        showAll: boolean,
+    ) => {
+        const updateGameType: GameType = {
+            gameDeck: gameDeck,
+            dealerCards: dealerCards,
+            playerCards: playerCards,
+            playerScore: playerScore,
+            dealerScore: dealerScore,
+            gameOutcome: gameOutcome,
+            isPlayerStaying: isStaying,
+            showAll: showAll,
+        };
+        setGameState(updateGameType);
     }
     const playerDrawCard = () => {
-        if (playDeck.current.length > 0) {
-            let drawnCard: Card = playDeck.current[0];
-            playDeck.current = playDeck.current.slice(1, playDeck.current.length);
-            myCards.push(drawnCard);
-            setMyCards(myCards);
-            setMyTotal(myTotal + drawnCard.numericValue);
-            if (myTotal + drawnCard.numericValue > 21) {
-                setGameStatus('You busted');
-                setPlayerStay(true);
-            }
-        }
-    }
-    const checkStatus = (TotalOfDealer: number, TotalOfPlayer: number) => {
-        setPlayerStay(true);
-        setShowAll(false)
-        if (TotalOfDealer < 17) {
-            dealerDrawCard();
-            console.log(dealerCards);
+        if (gameState.gameDeck.length > 0) {
+            let drawnCard: Card = gameState.gameDeck[0];
+            updateGameState(
+                gameState.gameDeck.slice(3, gameState.gameDeck.length),
+                gameState.dealerCards,
+                [...gameState.playerCards, drawnCard],
+                gameState.dealerScore,
+                gameState.playerScore + drawnCard.numericValue,
+                gameState.playerScore + drawnCard.numericValue > 21 ? 'You busted' : '',
+                gameState.playerScore + drawnCard.numericValue > 21,
+                true,
+            );
         }
     }
 
+    const getGameOutcome = (playerScore: number, dealerScore: number): string => {
+        if (dealerScore > 21){
+            return 'You win dealer busted'
+        }
+        if (dealerScore > playerScore ) {
+            return 'Dealer won'
+        }
+        if (dealerScore < playerScore){
+            return 'You win'
+        }
+        if (dealerScore == playerScore) {
+            return 'its a draw'
+        }
+        return ''
+    }
+    const checkStatus = () => {
+        let addDealerCards: Card[] = [];
+        let temporaryDealerValue: number = gameState.dealerScore;
+        let index: number = 0
+        while (temporaryDealerValue < 17) {
+            addDealerCards.push(gameState.gameDeck[index]);
+            temporaryDealerValue += gameState.gameDeck[index].numericValue;
+            index += 1;
+        }
+        updateGameState(
+            gameState.gameDeck.slice(index + 1, gameState.gameDeck.length),
+            [...gameState.dealerCards, ...addDealerCards],
+            gameState.playerCards,
+            temporaryDealerValue,
+            gameState.playerScore,
+            getGameOutcome(gameState.playerScore, temporaryDealerValue),
+            true,
+            false,
+        );
+    }
+
     useEffect(() => {
-        dealerDrawCard();
+        const newGameDeck: Card[] = new Deck().newDeck(6)
+        updateGameState(
+            newGameDeck.slice(3, newGameDeck.length),
+            [newGameDeck[0]],
+            [newGameDeck[1], newGameDeck[2]],
+            gameState.dealerScore + newGameDeck[0].numericValue,
+            gameState.playerScore + newGameDeck[1].numericValue + newGameDeck[2].numericValue,
+            '',
+            false,
+            true,
+        );
     }, [])
+
     return (
         <View style={{flex: 1}}>
             <ImageBackground source={require('blackJack/assets/images/background.jpg')} resizeMode={'cover'}
@@ -80,7 +138,7 @@ export const PlayScreen = ({navigation}) => {
                         paddingHorizontal: 20,
                     }}>
                         <View style={{alignItems: 'center', alignSelf: 'center', top: 0, position: 'absolute'}}>
-                            <Text style={styles().textStyles}>Dealer total: {dealerTotal}</Text>
+                            <Text style={styles().textStyles}>Dealer total: {gameState.dealerScore}</Text>
                             <Text style={styles().textStyles}>Dealer Cards:</Text>
                             <View style={{height: 20}}/>
                             <View style={{
@@ -91,12 +149,12 @@ export const PlayScreen = ({navigation}) => {
                                 flexDirection: 'row'
                             }}>
                                 {
-                                    dealerCards.map((card, index) =>
+                                    gameState.dealerCards.map((card, index) =>
                                         <GenerateCard key={index} card={card} index={index}/>
                                     )
                                 }
                                 {
-                                    showAll
+                                    gameState.showAll
                                         ? <Image key={1}
                                                  source={require('blackJack/assets/images/cardBackRed.png')}
                                                  style={[styles(1).imageStack]}
@@ -108,7 +166,7 @@ export const PlayScreen = ({navigation}) => {
                             </View>
                         </View>
                         <View style={{alignItems: 'center', alignSelf: 'center', bottom: 0, position: 'absolute'}}>
-                            <Text style={styles().textStyles}>My total: {myTotal}</Text>
+                            <Text style={styles().textStyles}>My total: {gameState.playerScore}</Text>
                             <Text style={styles().textStyles}>My Cards:</Text>
                             <View style={{height: 20}}/>
                             <View style={{
@@ -119,7 +177,7 @@ export const PlayScreen = ({navigation}) => {
                                 flexDirection: 'row'
                             }}>
                                 {
-                                    myCards.map((card, index) =>
+                                    gameState.playerCards.map((card, index) =>
                                         <GenerateCard key={index} card={card} index={index}/>
                                     )
                                 }
@@ -127,7 +185,7 @@ export const PlayScreen = ({navigation}) => {
                         </View>
                     </View>
                     <View style={{alignItems: 'center', justifyContent: 'center', paddingVertical: 10}}>
-                        <Text style={styles().textStyles}>{gameStatus}</Text>
+                        <Text style={styles().textStyles}>{gameState.gameOutcome}</Text>
                     </View>
                     <View style={{
                         flexDirection: 'row',
@@ -138,29 +196,25 @@ export const PlayScreen = ({navigation}) => {
                         <AppPrimaryButton
                             text={'Hit'}
                             onPress={() => playerDrawCard()}
-                            backgroundColor={playerStay ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
+                            backgroundColor={gameState.isPlayerStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
-                            isDisabled={playerStay}
+                            isDisabled={gameState.isPlayerStaying}
                             width={(scaledSize.width / 3) - 32}
                         />
                         <AppPrimaryButton
                             text={'stay'}
-                            onPress={async () => {
-                                checkStatus(dealerTotal, myTotal);
-                            }}
-                            backgroundColor={playerStay ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
+                            onPress={async () => checkStatus()}
+                            backgroundColor={gameState.isPlayerStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
-                            isDisabled={playerStay}
+                            isDisabled={gameState.isPlayerStaying}
                             width={(scaledSize.width / 3) - 32}
                         />
                         <AppPrimaryButton
                             text={'Play again'}
-                            onPress={(): void => {
-                                navigation.push(Routes.PlayScreen);
-                            }}
-                            backgroundColor={!playerStay ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
+                            onPress={(): void => navigation.push(Routes.PlayScreen)}
+                            backgroundColor={!gameState.isPlayerStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
-                            isDisabled={!playerStay}
+                            isDisabled={!gameState.isPlayerStaying}
                             width={(scaledSize.width / 3) - 32}
                         />
                     </View>

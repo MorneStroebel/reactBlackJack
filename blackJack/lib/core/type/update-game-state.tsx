@@ -1,12 +1,12 @@
 import {Card} from "./card";
 
-export type GameType = {
+export type UpdateGameState = {
     gameDeck: Card[],
-    playerCards: Card[],
     dealerCards: Card[],
-    playerScore: number,
+    playerCards: Card[],
     dealerScore: number,
-    isPlayerStaying: boolean
+    playerScore: number,
     gameOutcome: string,
+    isStaying: boolean,
     showAll: boolean,
 }

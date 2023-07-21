@@ -16,6 +16,9 @@ import {Deck} from "../../../../core/data/Deck";
 import {GenerateCard} from "../../../../core/data/generateCard";
 import {GameType} from "../../../../core/type/game-type";
 import {playScreenStyles} from "../styles/playScreenStyles";
+import {DealerInfo} from "../sub-views/dealer-info";
+import {PlayerInfo} from "../sub-views/player-info";
+import {UpdateGameState} from "../../../../core/type/update-game-state";
 
 export const PlayScreen = ({navigation}) => {
     const buttonActiveBackgroundColor: ColorValue = '#e1a0b5';
@@ -25,35 +28,37 @@ export const PlayScreen = ({navigation}) => {
     const insets: EdgeInsets = useSafeAreaInsets();
     const scaledSize: ScaledSize = useWindowDimensions();
 
-    const [gameState, setGameState] = useState<GameType>({
+    const [gameState, setGameState] = useState<UpdateGameState>({
         gameDeck: [],
         dealerCards: [],
         playerCards: [],
         playerScore: 0,
         dealerScore: 0,
         gameOutcome: '',
-        isPlayerStaying: false,
+        isStaying: false,
         showAll: true,
     });
 
     const updateGameState = (
-        gameDeck: Card[],
-        dealerCards: Card[],
-        playerCards: Card[],
-        dealerScore: number,
-        playerScore: number,
-        gameOutcome: string,
-        isStaying: boolean,
-        showAll: boolean,
+        {
+            gameDeck,
+            gameOutcome,
+            showAll,
+            dealerScore,
+            playerScore,
+            playerCards,
+            dealerCards,
+            isStaying
+        }: UpdateGameState
     ) => {
-        const updateGameType: GameType = {
+        const updateGameType: UpdateGameState = {
             gameDeck: gameDeck,
             dealerCards: dealerCards,
             playerCards: playerCards,
             playerScore: playerScore,
             dealerScore: dealerScore,
             gameOutcome: gameOutcome,
-            isPlayerStaying: isStaying,
+            isStaying: isStaying,
             showAll: showAll,
         };
         setGameState(updateGameType);
@@ -62,14 +67,16 @@ export const PlayScreen = ({navigation}) => {
         if (gameState.gameDeck.length > 0) {
             let drawnCard: Card = gameState.gameDeck[0];
             updateGameState(
-                gameState.gameDeck.slice(3, gameState.gameDeck.length),
-                gameState.dealerCards,
-                [...gameState.playerCards, drawnCard],
-                gameState.dealerScore,
-                gameState.playerScore + drawnCard.numericValue,
-                gameState.playerScore + drawnCard.numericValue > 21 ? 'You busted' : '',
-                gameState.playerScore + drawnCard.numericValue > 21,
-                true,
+                {
+                    gameDeck: gameState.gameDeck.slice(3, gameState.gameDeck.length),
+                    dealerCards: gameState.dealerCards,
+                    playerCards: [...gameState.playerCards, drawnCard],
+                    dealerScore: gameState.dealerScore,
+                    playerScore: gameState.playerScore + drawnCard.numericValue,
+                    gameOutcome: gameState.playerScore + drawnCard.numericValue > 21 ? 'You busted' : '',
+                    isStaying: gameState.playerScore + drawnCard.numericValue > 21,
+                    showAll: true,
+                }
             );
         }
     }
@@ -99,28 +106,33 @@ export const PlayScreen = ({navigation}) => {
             index += 1;
         }
         updateGameState(
-            gameState.gameDeck.slice(index + 1, gameState.gameDeck.length),
-            [...gameState.dealerCards, ...addDealerCards],
-            gameState.playerCards,
-            temporaryDealerValue,
-            gameState.playerScore,
-            getGameOutcome(gameState.playerScore, temporaryDealerValue),
-            true,
-            false,
+            {
+                gameDeck: gameState.gameDeck.slice(index + 1, gameState.gameDeck.length),
+                dealerCards: [...gameState.dealerCards, ...addDealerCards
+                ],
+                playerCards: gameState.playerCards,
+                dealerScore: temporaryDealerValue,
+                playerScore: gameState.playerScore,
+                gameOutcome: getGameOutcome(gameState.playerScore, temporaryDealerValue),
+                isStaying: true,
+                showAll: false,
+            }
         );
     }
 
     useEffect(() => {
         const newGameDeck: Card[] = new Deck().newDeck(1)
         updateGameState(
-            newGameDeck.slice(3, newGameDeck.length),
-            [newGameDeck[0]],
-            [newGameDeck[1], newGameDeck[2]],
-            gameState.dealerScore + newGameDeck[0].numericValue,
-            gameState.playerScore + newGameDeck[1].numericValue + newGameDeck[2].numericValue,
-            '',
-            false,
-            true,
+            {
+                gameDeck: newGameDeck.slice(3, newGameDeck.length),
+                dealerCards: [newGameDeck[0]],
+                playerCards: [newGameDeck[1], newGameDeck[2]],
+                dealerScore: gameState.dealerScore + newGameDeck[0].numericValue,
+                playerScore: gameState.playerScore + newGameDeck[1].numericValue + newGameDeck[2].numericValue,
+                gameOutcome: '',
+                isStaying: false,
+                showAll: true,
+            }
         );
     }, [])
 
@@ -130,38 +142,15 @@ export const PlayScreen = ({navigation}) => {
                              style={playScreenStyles({}).flex1}>
                 <View style={playScreenStyles({insets: insets, scaledSize: scaledSize}).mainView}>
                     <View style={playScreenStyles({}).playArea}>
-                        <View style={playScreenStyles({}).dealerInfo}>
-                            <Text style={playScreenStyles({}).textStyles}>Dealer total: {gameState.dealerScore}</Text>
-                            <Text style={playScreenStyles({}).textStyles}>Dealer Cards:</Text>
-                            <View style={playScreenStyles({}).cardBox}>
-                                {
-                                    gameState.dealerCards.map((card, index) =>
-                                        <GenerateCard key={index} card={card} index={index}/>
-                                    )
-                                }
-                                {
-                                    gameState.showAll
-                                        ? <Image key={1}
-                                                 source={require('blackJack/assets/images/cardBackRed.png')}
-                                                 style={[playScreenStyles({index: 1}).imageStack]}
-                                                 resizeMode={'cover'}
-                                                 borderRadius={10}
-                                        />
-                                        : null
-                                }
-                            </View>
-                        </View>
-                        <View style={playScreenStyles({}).playerInfo}>
-                            <Text style={playScreenStyles({}).textStyles}>My total: {gameState.playerScore}</Text>
-                            <Text style={playScreenStyles({}).textStyles}>My Cards:</Text>
-                            <View style={playScreenStyles({}).cardBox}>
-                                {
-                                    gameState.playerCards.map((card, index) =>
-                                        <GenerateCard key={index} card={card} index={index}/>
-                                    )
-                                }
-                            </View>
-                        </View>
+                        <DealerInfo
+                            dealerCards={gameState.dealerCards}
+                            showAll={gameState.showAll}
+                            dealerScore={gameState.dealerScore}
+                        />
+                        <PlayerInfo
+                            playerScore={gameState.playerScore}
+                            playerCards={gameState.playerCards}
+                        />
                     </View>
                     <View style={playScreenStyles({}).gameOutcome}>
                         <Text style={playScreenStyles({}).textStyles}>{gameState.gameOutcome}</Text>
@@ -170,25 +159,25 @@ export const PlayScreen = ({navigation}) => {
                         <AppPrimaryButton
                             text={'Hit'}
                             onPress={() => playerDrawCard()}
-                            backgroundColor={gameState.isPlayerStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
+                            backgroundColor={gameState.isStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
-                            isDisabled={gameState.isPlayerStaying}
+                            isDisabled={gameState.isStaying}
                             width={(scaledSize.width / 3) - 32}
                         />
                         <AppPrimaryButton
                             text={'stay'}
                             onPress={async () => checkStatus()}
-                            backgroundColor={gameState.isPlayerStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
+                            backgroundColor={gameState.isStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
-                            isDisabled={gameState.isPlayerStaying}
+                            isDisabled={gameState.isStaying}
                             width={(scaledSize.width / 3) - 32}
                         />
                         <AppPrimaryButton
                             text={'Play again'}
                             onPress={(): void => navigation.push(Routes.PlayScreen)}
-                            backgroundColor={!gameState.isPlayerStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
+                            backgroundColor={!gameState.isStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
-                            isDisabled={!gameState.isPlayerStaying}
+                            isDisabled={!gameState.isStaying}
                             width={(scaledSize.width / 3) - 32}
                         />
                     </View>

@@ -1,6 +1,36 @@
-import {Card, Suits} from "../type/card";
+import {Card, faceValue, Suits} from "../type/card";
 
 export class Deck {
+      getFaceValue = (cardNumber: number): faceValue => {
+          switch (cardNumber){
+              case 1:
+                  return faceValue.One;
+              case 2:
+                  return faceValue.Two;
+              case 3:
+                  return faceValue.Three;
+              case 4:
+                  return faceValue.Four;
+              case 5:
+                  return faceValue.Five;
+              case 6:
+                  return faceValue.Six;
+              case 7:
+                  return faceValue.Seven;
+              case 8:
+                  return faceValue.Eight;
+              case 9:
+                  return faceValue.Nine;
+              case 10:
+                  return faceValue.Ten;
+              case 11:
+                  return faceValue.Jack;
+              case 12:
+                  return faceValue.Queen;
+              default:
+                  return faceValue.King;
+          }
+    }
     newDeck = (numberOfDecks: number): Card[] => {
         let deck: Card[] = [];
         {
@@ -8,13 +38,13 @@ export class Deck {
                 for (let j = 0; j < numberOfDecks; j++) {
                     for (let k = 0; k < 5; k++) {
                         if(k == 0){
-                           deck.push({numericValue: i, suitValue: Suits.Hearts})
+                           deck.push({numericValue: i > 10? 10 : i, suitValue: Suits.Hearts, faceValue:this.getFaceValue(i)})
                         }if(k == 1){
-                           deck.push({numericValue: i, suitValue: Suits.Diamonds})
+                           deck.push({numericValue:  i > 10? 10 : i, suitValue: Suits.Diamonds, faceValue:this.getFaceValue(i)})
                         }if(k == 2){
-                           deck.push({numericValue: i, suitValue: Suits.Clover})
+                           deck.push({numericValue:  i > 10? 10 : i, suitValue: Suits.Clover, faceValue:this.getFaceValue(i)})
                         }if(k == 3){
-                           deck.push({numericValue: i, suitValue: Suits.Clubs})
+                           deck.push({numericValue:  i > 10? 10 : i, suitValue: Suits.Clubs, faceValue:this.getFaceValue(i)})
                         }
                     }
                 }

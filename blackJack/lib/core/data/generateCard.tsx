@@ -11,7 +11,7 @@ type Props = {
 export const GenerateCard: React.FC<Props> = ({card, index}) => {
     return (
         <View style={styles(index).imageStack}>
-            <Text>{card.numericValue}</Text>
+            <Text>{card.faceValue}</Text>
             <Text>{card.suitValue}</Text>
         </View>
     );

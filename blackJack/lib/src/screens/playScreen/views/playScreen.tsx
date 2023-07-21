@@ -15,9 +15,12 @@ import AppPrimaryButton from "../../../../core/shared components/AppButton";
 import {Deck} from "../../../../core/data/Deck";
 import {GenerateCard} from "../../../../core/data/generateCard";
 import {GameType} from "../../../../core/type/game-type";
-
+import {playScreenStyles} from "../styles/playScreenStyles";
 
 export const PlayScreen = ({navigation}) => {
+    const buttonActiveBackgroundColor: ColorValue = '#e1a0b5';
+    const buttonDisabledBackgroundColor: ColorValue = '#959ba6';
+    const buttonTextColor: ColorValue = '#181f12';
 
     const insets: EdgeInsets = useSafeAreaInsets();
     const scaledSize: ScaledSize = useWindowDimensions();
@@ -122,32 +125,15 @@ export const PlayScreen = ({navigation}) => {
     }, [])
 
     return (
-        <View style={{flex: 1}}>
+        <View style={playScreenStyles({}).flex1}>
             <ImageBackground source={require('blackJack/assets/images/background.jpg')} resizeMode={'cover'}
-                             style={{flex: 1}}>
-                <View style={{
-                    paddingTop: insets.top,
-                    paddingBottom: insets.bottom,
-                    height: scaledSize.height,
-                    width: scaledSize.width,
-                }}>
-                    <View style={{
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        height: '85%',
-                        paddingHorizontal: 20,
-                    }}>
-                        <View style={{alignItems: 'center', alignSelf: 'center', top: 0, position: 'absolute'}}>
-                            <Text style={styles({}).textStyles}>Dealer total: {gameState.dealerScore}</Text>
-                            <Text style={styles({}).textStyles}>Dealer Cards:</Text>
-                            <View style={{height: 20}}/>
-                            <View style={{
-                                height: 144,
-                                width: '100%',
-                                alignSelf: 'center',
-                                alignContent: 'center',
-                                flexDirection: 'row'
-                            }}>
+                             style={playScreenStyles({}).flex1}>
+                <View style={playScreenStyles({insets: insets, scaledSize: scaledSize}).mainView}>
+                    <View style={playScreenStyles({}).playArea}>
+                        <View style={playScreenStyles({}).dealerInfo}>
+                            <Text style={playScreenStyles({}).textStyles}>Dealer total: {gameState.dealerScore}</Text>
+                            <Text style={playScreenStyles({}).textStyles}>Dealer Cards:</Text>
+                            <View style={playScreenStyles({}).cardBox}>
                                 {
                                     gameState.dealerCards.map((card, index) =>
                                         <GenerateCard key={index} card={card} index={index}/>
@@ -157,7 +143,7 @@ export const PlayScreen = ({navigation}) => {
                                     gameState.showAll
                                         ? <Image key={1}
                                                  source={require('blackJack/assets/images/cardBackRed.png')}
-                                                 style={[styles({index: 1}).imageStack]}
+                                                 style={[playScreenStyles({index: 1}).imageStack]}
                                                  resizeMode={'cover'}
                                                  borderRadius={10}
                                         />
@@ -165,17 +151,10 @@ export const PlayScreen = ({navigation}) => {
                                 }
                             </View>
                         </View>
-                        <View style={{alignItems: 'center', alignSelf: 'center', bottom: 0, position: 'absolute'}}>
-                            <Text style={styles({}).textStyles}>My total: {gameState.playerScore}</Text>
-                            <Text style={styles({}).textStyles}>My Cards:</Text>
-                            <View style={{height: 20}}/>
-                            <View style={{
-                                height: 144,
-                                width: '100%',
-                                alignSelf: 'center',
-                                alignContent: 'center',
-                                flexDirection: 'row'
-                            }}>
+                        <View style={playScreenStyles({}).playerInfo}>
+                            <Text style={playScreenStyles({}).textStyles}>My total: {gameState.playerScore}</Text>
+                            <Text style={playScreenStyles({}).textStyles}>My Cards:</Text>
+                            <View style={playScreenStyles({}).cardBox}>
                                 {
                                     gameState.playerCards.map((card, index) =>
                                         <GenerateCard key={index} card={card} index={index}/>
@@ -184,15 +163,10 @@ export const PlayScreen = ({navigation}) => {
                             </View>
                         </View>
                     </View>
-                    <View style={{alignItems: 'center', justifyContent: 'center', paddingVertical: 10}}>
-                        <Text style={styles({}).textStyles}>{gameState.gameOutcome}</Text>
+                    <View style={playScreenStyles({}).gameOutcome}>
+                        <Text style={playScreenStyles({}).textStyles}>{gameState.gameOutcome}</Text>
                     </View>
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        paddingHorizontal: 16,
-                        width: scaledSize.width
-                    }}>
+                    <View style={playScreenStyles({scaledSize: scaledSize}).buttonRow}>
                         <AppPrimaryButton
                             text={'Hit'}
                             onPress={() => playerDrawCard()}
@@ -223,40 +197,4 @@ export const PlayScreen = ({navigation}) => {
         </View>
     );
 }
-
-const buttonActiveBackgroundColor: ColorValue = '#e1a0b5'
-const buttonDisabledBackgroundColor: ColorValue = '#959ba6'
-const buttonTextColor: ColorValue = '#181f12'
-
-type StyleProps = {
-    index?: number
-    insets?: EdgeInsets,
-    scaledSize?: ScaledSize,
-}
-export const styles = (styleProps: StyleProps) => {
-    return StyleSheet.create({
-        textStyles: {
-            color: '#f7ecdc',
-            fontSize: 18
-        },
-        imageStack: {
-            height: 150,
-            width: 80,
-            position: 'absolute',
-            right: -styleProps.index * 20,
-            backgroundColor: 'white',
-            borderRadius: 10,
-            borderWidth: 0.5,
-            borderColor: 'black',
-            padding: 16
-        },
-        // mainView: {
-        //     paddingTop: styleProps.insets.top,
-        //     paddingBottom: styleProps.insets.bottom,
-        //     height: styleProps.scaledSize.height,
-        //     width: styleProps.scaledSize.width,
-        // }
-    });
-};
-
 

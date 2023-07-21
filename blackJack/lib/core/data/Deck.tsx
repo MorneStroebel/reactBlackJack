@@ -31,25 +31,35 @@ export class Deck {
                   return faceValue.King;
           }
     }
+
+    getNumericValue = (initialValue: number): number => {
+          return initialValue > 10 ? 10 : initialValue
+    }
     newDeck = (numberOfDecks: number): Card[] => {
         let deck: Card[] = [];
         {
             for (let i = 1; i < 14; i++) {
                 for (let j = 0; j < numberOfDecks; j++) {
-                    for (let k = 0; k < 5; k++) {
-                        if(k == 0){
-                           deck.push({numericValue: i > 10? 10 : i, suitValue: Suits.Hearts, faceValue:this.getFaceValue(i)})
-                        }if(k == 1){
-                           deck.push({numericValue:  i > 10? 10 : i, suitValue: Suits.Diamonds, faceValue:this.getFaceValue(i)})
-                        }if(k == 2){
-                           deck.push({numericValue:  i > 10? 10 : i, suitValue: Suits.Clover, faceValue:this.getFaceValue(i)})
-                        }if(k == 3){
-                           deck.push({numericValue:  i > 10? 10 : i, suitValue: Suits.Clubs, faceValue:this.getFaceValue(i)})
+                    for (let k = 0; k < 4; k++) {
+                        switch (k) {
+                            case 0:
+                                deck.push({numericValue: this.getNumericValue(i), suitValue: Suits.Hearts, faceValue:this.getFaceValue(i)});
+                                break;
+                            case 1:
+                                deck.push({numericValue:  this.getNumericValue(i), suitValue: Suits.Diamonds, faceValue:this.getFaceValue(i)})
+                                break;
+                            case 2:
+                                deck.push({numericValue:  this.getNumericValue(i), suitValue: Suits.Clover, faceValue:this.getFaceValue(i)})
+                                break;
+                            case  3:
+                                deck.push({numericValue:  this.getNumericValue(i), suitValue: Suits.Clubs, faceValue:this.getFaceValue(i)})
+                                break;
                         }
                     }
                 }
             }
         }
+        console.log(deck);
        return deck.sort(()=> Math.random() - 0.5)
     }
 }

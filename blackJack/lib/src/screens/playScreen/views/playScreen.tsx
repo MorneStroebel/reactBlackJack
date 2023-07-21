@@ -72,13 +72,13 @@ export const PlayScreen = ({navigation}) => {
     }
 
     const getGameOutcome = (playerScore: number, dealerScore: number): string => {
-        if (dealerScore > 21){
+        if (dealerScore > 21) {
             return 'You win dealer busted'
         }
-        if (dealerScore > playerScore ) {
+        if (dealerScore > playerScore) {
             return 'Dealer won'
         }
-        if (dealerScore < playerScore){
+        if (dealerScore < playerScore) {
             return 'You win'
         }
         if (dealerScore == playerScore) {
@@ -138,8 +138,8 @@ export const PlayScreen = ({navigation}) => {
                         paddingHorizontal: 20,
                     }}>
                         <View style={{alignItems: 'center', alignSelf: 'center', top: 0, position: 'absolute'}}>
-                            <Text style={styles().textStyles}>Dealer total: {gameState.dealerScore}</Text>
-                            <Text style={styles().textStyles}>Dealer Cards:</Text>
+                            <Text style={styles({}).textStyles}>Dealer total: {gameState.dealerScore}</Text>
+                            <Text style={styles({}).textStyles}>Dealer Cards:</Text>
                             <View style={{height: 20}}/>
                             <View style={{
                                 height: 144,
@@ -157,7 +157,7 @@ export const PlayScreen = ({navigation}) => {
                                     gameState.showAll
                                         ? <Image key={1}
                                                  source={require('blackJack/assets/images/cardBackRed.png')}
-                                                 style={[styles(1).imageStack]}
+                                                 style={[styles({index: 1}).imageStack]}
                                                  resizeMode={'cover'}
                                                  borderRadius={10}
                                         />
@@ -166,8 +166,8 @@ export const PlayScreen = ({navigation}) => {
                             </View>
                         </View>
                         <View style={{alignItems: 'center', alignSelf: 'center', bottom: 0, position: 'absolute'}}>
-                            <Text style={styles().textStyles}>My total: {gameState.playerScore}</Text>
-                            <Text style={styles().textStyles}>My Cards:</Text>
+                            <Text style={styles({}).textStyles}>My total: {gameState.playerScore}</Text>
+                            <Text style={styles({}).textStyles}>My Cards:</Text>
                             <View style={{height: 20}}/>
                             <View style={{
                                 height: 144,
@@ -185,7 +185,7 @@ export const PlayScreen = ({navigation}) => {
                         </View>
                     </View>
                     <View style={{alignItems: 'center', justifyContent: 'center', paddingVertical: 10}}>
-                        <Text style={styles().textStyles}>{gameState.gameOutcome}</Text>
+                        <Text style={styles({}).textStyles}>{gameState.gameOutcome}</Text>
                     </View>
                     <View style={{
                         flexDirection: 'row',
@@ -227,7 +227,13 @@ export const PlayScreen = ({navigation}) => {
 const buttonActiveBackgroundColor: ColorValue = '#e1a0b5'
 const buttonDisabledBackgroundColor: ColorValue = '#959ba6'
 const buttonTextColor: ColorValue = '#181f12'
-export const styles = (index?: number) => {
+
+type StyleProps = {
+    index?: number
+    insets?: EdgeInsets,
+    scaledSize?: ScaledSize,
+}
+export const styles = (styleProps: StyleProps) => {
     return StyleSheet.create({
         textStyles: {
             color: '#f7ecdc',
@@ -237,13 +243,19 @@ export const styles = (index?: number) => {
             height: 150,
             width: 80,
             position: 'absolute',
-            right: -index * 20,
+            right: -styleProps.index * 20,
             backgroundColor: 'white',
             borderRadius: 10,
             borderWidth: 0.5,
             borderColor: 'black',
             padding: 16
         },
+        // mainView: {
+        //     paddingTop: styleProps.insets.top,
+        //     paddingBottom: styleProps.insets.bottom,
+        //     height: styleProps.scaledSize.height,
+        //     width: styleProps.scaledSize.width,
+        // }
     });
 };
 

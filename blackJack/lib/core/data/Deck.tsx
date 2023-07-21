@@ -52,10 +52,4 @@ export class Deck {
         }
        return deck.sort(()=> Math.random() - 0.5)
     }
-
-    getTopCard = (deck: Card[]): [Card , Card[]] => {
-        let topCard: Card = deck[0];
-        let newDeck: Card[] = deck.splice(0,1)
-        return[ topCard , deck];
-    }
 }

@@ -1,4 +1,5 @@
 import {Card, faceValue, Suits} from "../type/card";
+import {UpdateGameState} from "../type/update-game-state";
 
 export class Deck {
     getFaceValue = (cardNumber: number): faceValue => {
@@ -82,5 +83,62 @@ export class Deck {
         }
         console.log(deck);
         return deck.sort(() => Math.random() - 0.5)
+    }
+
+    playerDrawCard = (gameState: UpdateGameState): UpdateGameState => {
+        let updateGameState: UpdateGameState = {} as UpdateGameState;
+        if (gameState.gameDeck.length > 0) {
+            let drawnCard: Card = gameState.gameDeck[0];
+            updateGameState =
+                {
+                    gameDeck: gameState.gameDeck.slice(3, gameState.gameDeck.length),
+                    dealerCards: gameState.dealerCards,
+                    playerCards: [...gameState.playerCards, drawnCard],
+                    dealerScore: gameState.dealerScore,
+                    playerScore: gameState.playerScore + drawnCard.numericValue,
+                    gameOutcome: gameState.playerScore + drawnCard.numericValue > 21 ? 'You busted' : '',
+                    isStaying: gameState.playerScore + drawnCard.numericValue > 21,
+                    showAll: true,
+                };
+        }
+        return updateGameState;
+    }
+
+    getGameOutcome = (playerScore: number, dealerScore: number): string => {
+        if (dealerScore > 21) {
+            return 'You win dealer busted'
+        }
+        if (dealerScore > playerScore) {
+            return 'Dealer won'
+        }
+        if (dealerScore < playerScore) {
+            return 'You win'
+        }
+        if (dealerScore == playerScore) {
+            return 'its a draw'
+        }
+        return ''
+    }
+    checkStatus = (gameState: UpdateGameState): UpdateGameState => {
+        let addDealerCards: Card[] = [];
+        let updateGameSate: UpdateGameState = {} as UpdateGameState;
+        let temporaryDealerValue: number = gameState.dealerScore;
+        let index: number = 0
+        while (temporaryDealerValue < 17) {
+            addDealerCards.push(gameState.gameDeck[index]);
+            temporaryDealerValue += gameState.gameDeck[index].numericValue;
+            index += 1;
+        }
+        return updateGameSate = {
+            gameDeck: gameState.gameDeck.slice(index + 1, gameState.gameDeck.length),
+            dealerCards: [...gameState.dealerCards, ...addDealerCards
+            ],
+            playerCards: gameState.playerCards,
+            dealerScore: temporaryDealerValue,
+            playerScore: gameState.playerScore,
+            gameOutcome: this.getGameOutcome(gameState.playerScore, temporaryDealerValue),
+            isStaying: true,
+            showAll: false,
+        };
     }
 }

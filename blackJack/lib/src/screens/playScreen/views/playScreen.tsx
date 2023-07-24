@@ -27,6 +27,7 @@ export const PlayScreen = ({navigation}) => {
 
     const insets: EdgeInsets = useSafeAreaInsets();
     const scaledSize: ScaledSize = useWindowDimensions();
+    const deck: Deck = new Deck();
 
     const [gameState, setGameState] = useState<UpdateGameState>({
         gameDeck: [],
@@ -63,65 +64,9 @@ export const PlayScreen = ({navigation}) => {
         };
         setGameState(updateGameType);
     }
-    const playerDrawCard = () => {
-        if (gameState.gameDeck.length > 0) {
-            let drawnCard: Card = gameState.gameDeck[0];
-            updateGameState(
-                {
-                    gameDeck: gameState.gameDeck.slice(3, gameState.gameDeck.length),
-                    dealerCards: gameState.dealerCards,
-                    playerCards: [...gameState.playerCards, drawnCard],
-                    dealerScore: gameState.dealerScore,
-                    playerScore: gameState.playerScore + drawnCard.numericValue,
-                    gameOutcome: gameState.playerScore + drawnCard.numericValue > 21 ? 'You busted' : '',
-                    isStaying: gameState.playerScore + drawnCard.numericValue > 21,
-                    showAll: true,
-                }
-            );
-        }
-    }
-
-    const getGameOutcome = (playerScore: number, dealerScore: number): string => {
-        if (dealerScore > 21) {
-            return 'You win dealer busted'
-        }
-        if (dealerScore > playerScore) {
-            return 'Dealer won'
-        }
-        if (dealerScore < playerScore) {
-            return 'You win'
-        }
-        if (dealerScore == playerScore) {
-            return 'its a draw'
-        }
-        return ''
-    }
-    const checkStatus = () => {
-        let addDealerCards: Card[] = [];
-        let temporaryDealerValue: number = gameState.dealerScore;
-        let index: number = 0
-        while (temporaryDealerValue < 17) {
-            addDealerCards.push(gameState.gameDeck[index]);
-            temporaryDealerValue += gameState.gameDeck[index].numericValue;
-            index += 1;
-        }
-        updateGameState(
-            {
-                gameDeck: gameState.gameDeck.slice(index + 1, gameState.gameDeck.length),
-                dealerCards: [...gameState.dealerCards, ...addDealerCards
-                ],
-                playerCards: gameState.playerCards,
-                dealerScore: temporaryDealerValue,
-                playerScore: gameState.playerScore,
-                gameOutcome: getGameOutcome(gameState.playerScore, temporaryDealerValue),
-                isStaying: true,
-                showAll: false,
-            }
-        );
-    }
 
     useEffect(() => {
-        const newGameDeck: Card[] = new Deck().newDeck(1)
+        const newGameDeck: Card[] = deck.newDeck(1)
         updateGameState(
             {
                 gameDeck: newGameDeck.slice(3, newGameDeck.length),
@@ -158,7 +103,7 @@ export const PlayScreen = ({navigation}) => {
                     <View style={playScreenStyles({scaledSize: scaledSize}).buttonRow}>
                         <AppPrimaryButton
                             text={'Hit'}
-                            onPress={() => playerDrawCard()}
+                            onPress={() => updateGameState(deck.playerDrawCard(gameState))}
                             backgroundColor={gameState.isStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
                             isDisabled={gameState.isStaying}
@@ -166,7 +111,7 @@ export const PlayScreen = ({navigation}) => {
                         />
                         <AppPrimaryButton
                             text={'stay'}
-                            onPress={async () => checkStatus()}
+                            onPress={async () => updateGameState(deck.checkStatus(gameState))}
                             backgroundColor={gameState.isStaying ? buttonDisabledBackgroundColor : buttonActiveBackgroundColor}
                             textColor={buttonTextColor}
                             isDisabled={gameState.isStaying}
